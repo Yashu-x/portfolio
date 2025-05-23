@@ -53,8 +53,7 @@ jobs:
         # Step 2: Update Helm chart with new image tag
         - name: Update Helm chart
           run: |
-            sed -i 's/tag: .*/tag:"${github.run_id}"/' helm/portfolio/values.yaml
-
+            sed -i 's/tag: .*/tag:"${github.run_id}"/' helm/portfolio-chart/values.yaml
         # Step 3: Commit and push changes
         - name: Commit and push changes
           run: |
