@@ -48,17 +48,21 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4
           with:
-            tock: ${{ secrets.TOKEN }}
+            tocken: ${{ secrets.TOKEN }}
 
         # Step 2: Update Helm chart with new image tag
         - name: Update Helm chart
+          env:
+            IMAGE_TAG: ${{ github.run_id }}
           run: |
-            sed -i 's/tag: .*/tag:"${github.run_id}"/' helm/portfolio-chart/values.yaml
+            sed -i "s/tag: .*/tag: \"$IMAGE_TAG\"/" helm/portfolio-chart/values.yaml
         # Step 3: Commit and push changes
         - name: Commit and push changes
+          env:
+            GITHUB_TOKEN: ${{ secrets.TOKEN }}
           run: |
             git config --global user.name "Yashu-x || Thashenu"
             git config --global user.email "n.thashenu@gmail.com"
             git add helm/portfolio-chart/values.yaml
-            git commit -m "Update image tag to ${{github.run_id}}"
+            git commit -m "Update image tag to $IMAGE_TAG"
             git push origin main
