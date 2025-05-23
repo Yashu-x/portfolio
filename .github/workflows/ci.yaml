@@ -1,0 +1,65 @@
+name: CI pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+      - "helm/**"
+      - "k8s/**"
+    
+jobs:
+    build-and-push:
+      runs-on: ubuntu-latest
+
+      steps:
+        # Step 1: Checkout the code
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+
+          # Step 3: Log in to Docker Hub
+        - name: Login to Docker Hub
+          run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u thashenu --password-stdin
+          env:
+            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+
+        # Step 2: Build Docker image
+        - name: Build Docker image
+          run: |
+            docker build -t thashenu/portfolio:latest . 
+
+        # Step 4: Push Docker image
+        - name: Push Docker image
+          run: |
+            docker push thashenu/portfolio:latest
+
+        # Step 5: Logout from Docker Hub (always run)
+        - name: Logout from Docker Hubr                                                                                                                                                                                                                                        
+          run: docker logout
+
+    update-helm:
+      runs-on: ubuntu-latest
+      needs: build-and-push
+      steps:
+        # Step 1: Checkout the code
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            tock: ${{ secrets.TOKEN }}
+
+        # Step 2: Update Helm chart with new image tag
+        - name: Update Helm chart
+          run: |
+            sed -i 's/tag: .*/tag:"${github.run_id}"/' helm/portfolio/values.yaml
+
+        # Step 3: Commit and push changes
+        - name: Commit and push changes
+          run: |
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "n.thashenu@gmail.com"
+            git add helm/portfolio/values.yaml
+            git commit -m "Update image tag to ${github.run_id}"
+            git push origin main
