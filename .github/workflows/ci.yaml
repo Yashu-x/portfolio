@@ -7,7 +7,6 @@ on:
     paths-ignore:
       - "README.md"
       - "helm/**"
-      - "k8s/**"
     
 jobs:
     build-and-push:
@@ -65,4 +64,4 @@ jobs:
             git config --global user.email "n.thashenu@gmail.com"
             git add helm/portfolio-chart/values.yaml
             git commit -m "Update image tag to $IMAGE_TAG"
-            git push origin main
+             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Yashu-x/portfolio.git HEAD:main
